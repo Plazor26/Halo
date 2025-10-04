@@ -1,0 +1,36 @@
+halo/
+├── halo_core/             # Core logic (command parser, skill router)
+│   ├── __init__.py
+│   ├── main.py            # Entry point
+│   ├── config.py          # Global configs (paths, hotkeys, API keys if any)
+│   ├── voice/
+│   │   ├── recognizer.py  # Whisper.cpp wrapper for local STT
+│   │   ├── tts.py         # Piper TTS or Edge TTS wrapper
+│   │   └── wakeword.py    # Hotword detection ("Halo")
+│   ├── llm/
+│   │   ├── local_llm.py   # Local LLM interface (gguf/ollama/llamacpp)
+│   │   └── intent_parser.py
+│   ├── skills/
+│   │   ├── __init__.py
+│   │   ├── system_control.py  # Shutdown, sleep, mute, VPN toggle, etc.
+│   │   ├── apps.py           # Open/close/save apps/files
+│   │   ├── automation.py     # Scheduled tasks, reactive behaviors
+│   │   ├── monitoring.py     # UPS, temps, processes
+│   │   └── notifications.py  # Toasts, TTS alerts
+│   └── ui/
+│       ├── hud.py            # Overlay HUD widget
+│       ├── notifications.py  # On-screen popups
+│       └── history_panel.py  # Command history/debug panel
+│
+├── scripts/              # PowerShell, AHK, or Python scripts for skills
+│   ├── graceful_shutdown.ps1
+│   ├── launch_dev_mode.ps1
+│   └── ...
+│
+├── tests/                # Automated tests for modules
+├── assets/               # Icons, sounds (activation chime, voice SFX)
+├── configs/              # User preferences, skill configs
+│   └── settings.yaml
+├── LICENSE.md
+├── README.md
+└── run.py                # Launcher script
