@@ -1,71 +1,107 @@
 import json
 import re
 import traceback
-from halo_core.llm.local_llm import LocalLLM
+from pathlib import Path
 
 class IntentParser:
-    def __init__(self, model="gemma3:4b", llm=None, debug=False):
-        self.llm = llm if llm is not None else LocalLLM(model=model)
-        self.debug = debug  # 👈 THIS was missing
+    """
+    Intent Parser:
+    - Handles quick regex-based detection for special cases (like volume)
+    - Validates & cleans intents JSON returned by the LLM
+    - Uses external action_map.json for validation
+    - Does NOT call the LLM itself anymore (that happens in main.py)
+    """
 
-        self.system_prompt = (
-            "You are Halo's intent parser. "
-            "Your job is to convert natural language commands into structured JSON objects.\n\n"
-            "RULES:\n"
-            " - Return ONLY valid JSON. No explanations, no extra text.\n"
-            " - Do NOT wrap JSON in Markdown fences.\n"
-            " - JSON format:\n"
-            "{\n"
-            "  \"intents\": [\n"
-            "    {\"action\": \"<action>\", \"target\": \"<optional_target>\"}\n"
-            "  ]\n"
-            "}\n"
-            " - Examples of actions: open_app, close_app, mute_system, unmute_system, shutdown, restart, search_web, play_media, stop_media, schedule_task\n"
-            " - Targets are things like 'chrome', 'spotify', 'notepad', file paths, or search queries.\n"
-            " - If multiple commands are given, include multiple objects in the intents array.\n"
-            " - If unsure, guess the closest reasonable action.\n"
-        )
+    def __init__(self, debug=False):
+        self.debug = debug
+        self.action_map = self._load_action_map()
 
+    def _load_action_map(self):
+        """
+        Load action_map.json from the skills directory.
+        """
+        action_map_path = Path(__file__).resolve().parent.parent / "skills" / "action_map.json"
+        try:
+            with open(action_map_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"[IntentParser] ⚠️ Failed to load action_map.json: {e}")
+            return {}
 
-
-    def parse(self, text):
-        # 1️⃣ Volume command pattern
+    def _handle_special_cases(self, text):
+        """
+        Handle special cases that are easy to regex without LLM.
+        e.g. volume adjustments like "set volume to 50%"
+        """
+        # 🔊 Volume: "set volume to X%", "volume 70", "increase volume to 30"
         volume_match = re.search(r"volume\s*(to)?\s*(\d{1,3})\s*%?", text.lower())
         if volume_match:
             vol = int(volume_match.group(2))
+            vol = max(0, min(100, vol))
             return {"intents": [{"action": "set_volume", "target": vol}]}
-        # 2️⃣ Fallback to LLM
-        """Convert natural language into structured intents via local LLM."""
-        full_prompt = f"{self.system_prompt}\nUser command: \"{text}\"\nJSON:\n"
 
-        # Collect streaming chunks
-        chunks = []
+        return None
+
+    def validate_intents(self, raw_json_str):
+        """
+        Validates that a given string is valid intents JSON.
+        Returns {"intents": [...]} or {"intents": []} on failure.
+        """
         try:
-            for c in self.llm.generate(full_prompt, stream=True):
-                chunks.append(c)
+            data = json.loads(raw_json_str)
+            if self.debug:
+                print("[IntentParser Raw JSON]", data)
+
+            if not isinstance(data, dict) or "intents" not in data:
+                return {"intents": []}
+
+            intents = data["intents"]
+            if not isinstance(intents, list):
+                return {"intents": []}
+
+            # 🧼 Clean up & filter by action_map
+            clean_intents = []
+            for intent in intents:
+                if not isinstance(intent, dict):
+                    continue
+
+                action = intent.get("action")
+                target = intent.get("target")
+
+                if action and action in self.action_map:
+                    clean_intents.append({"action": action, "target": target})
+                else:
+                    if self.debug:
+                        print(f"[IntentParser] ⚠️ Ignored unknown action: {action}")
+
+            return {"intents": clean_intents}
+
         except Exception as e:
-            print(f"[IntentParser] ❌ LLM streaming failed: {e}")
+            print("[IntentParser] ❌ Failed to parse or validate JSON:")
+            print(raw_json_str)
+            print(f"[Error] {e}")
             traceback.print_exc()
             return {"intents": []}
 
-        response = "".join(chunks).strip()
+    def parse(self, text_or_json):
+        """
+        Entry point:
+        - If input is natural language, check special cases.
+        - If input is JSON (string), validate it.
+        - If dict, also validate structure.
+        """
+        # 1️⃣ Special cases first
+        if isinstance(text_or_json, str):
+            special = self._handle_special_cases(text_or_json)
+            if special:
+                return special
 
-        # Strip possible markdown fences or language hints
-        response = re.sub(r"^```(?:json)?\s*", "", response)
-        response = re.sub(r"\s*```$", "", response)
+            # Might be a JSON string (from LLM)
+            if text_or_json.strip().startswith("{"):
+                return self.validate_intents(text_or_json)
 
-        if self.debug:
-            print("[IntentParser Raw LLM]", response)
+        # 2️⃣ If already a dict (from LLM), validate structure
+        if isinstance(text_or_json, dict):
+            return self.validate_intents(json.dumps(text_or_json))
 
-        # Validate and parse JSON
-        try:
-            data = json.loads(response)
-            # Sanity check: ensure "intents" is at least present
-            if "intents" not in data or not isinstance(data["intents"], list):
-                raise ValueError("Missing or malformed 'intents' key")
-            return data
-        except Exception as e:
-            print("[IntentParser] ❌ Failed to parse JSON from LLM response:")
-            print(response)
-            print(f"[Error] {e}")
-            return {"intents": []}
+        return {"intents": []}

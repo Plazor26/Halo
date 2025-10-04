@@ -1,4 +1,4 @@
-# HALO
+# HALO Assistant
 
 Local voice AI copilot for your desktop. Offline-first. Privacy-respecting. Modular skills.
 Community (Non-Commercial) Edition.

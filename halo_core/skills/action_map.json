@@ -1,0 +1,22 @@
+{
+  "shutdown": ["system_control", "shutdown"],
+  "restart": ["system_control", "restart"],
+  "sleep": ["system_control", "sleep"],
+  "mute_system": ["system_control", "mute_system"],
+  "unmute_system": ["system_control", "unmute_system"],
+  "set_volume": ["system_control", "set_volume"],
+  "close_all_apps": ["system_control", "close_all_apps"],
+  "open_task_manager": ["system_control", "open_task_manager"],
+  "open_website": ["system_control", "open_website"],
+  "play_pause_media": ["system_control", "play_pause_media"],
+
+  "open_app": ["apps", "open_app"],
+  "close_app": ["apps", "close_app"],
+
+  "schedule_task": ["automation", "schedule_task"],
+  "check_status": ["monitoring", "check_status"],
+  "notify": ["notifications", "send_notification"],
+
+  "shutdown_computer": ["system_control", "shutdown"],
+  "restart_computer": ["system_control", "restart"]
+}
