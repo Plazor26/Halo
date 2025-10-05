@@ -149,6 +149,9 @@ venv.bak/
 #whisper
 /whisper
 
+#plan and roadmaps
+plan.txt
+
 # mypy
 .mypy_cache/
 .dmypy.json

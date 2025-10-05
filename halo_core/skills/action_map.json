@@ -1,22 +1,121 @@
 {
-  "shutdown": ["system_control", "shutdown"],
-  "restart": ["system_control", "restart"],
-  "sleep": ["system_control", "sleep"],
-  "mute_system": ["system_control", "mute_system"],
-  "unmute_system": ["system_control", "unmute_system"],
-  "set_volume": ["system_control", "set_volume"],
-  "close_all_apps": ["system_control", "close_all_apps"],
-  "open_task_manager": ["system_control", "open_task_manager"],
-  "open_website": ["system_control", "open_website"],
-  "play_pause_media": ["system_control", "play_pause_media"],
+  "shutdown": {
+    "module": "system_control",
+    "function": "shutdown",
+    "description": "Power off the computer."
+  },
+  "restart": {
+    "module": "system_control",
+    "function": "restart",
+    "description": "Restart the computer."
+  },
+  "sleep": {
+    "module": "system_control",
+    "function": "sleep",
+    "description": "Put the computer to sleep."
+  },
+  "mute_system": {
+    "module": "system_control",
+    "function": "mute_system",
+    "description": "Mute system audio."
+  },
+  "unmute_system": {
+    "module": "system_control",
+    "function": "unmute_system",
+    "description": "Unmute system audio."
+  },
+  "set_volume": {
+    "module": "system_control",
+    "function": "set_volume",
+    "description": "Set system volume to a level between 0–100. Target: integer percent."
+  },
+  "close_all_apps": {
+    "module": "system_control",
+    "function": "close_all_apps",
+    "description": "Close all visible application windows. Use with caution."
+  },
+  "open_task_manager": {
+    "module": "system_control",
+    "function": "open_task_manager",
+    "description": "Open Windows Task Manager."
+  },
+  "open_website": {
+    "module": "system_control",
+    "function": "open_website",
+    "description": "Open a URL in the default browser. Target: URL string."
+  },
+  "play_pause_media": {
+    "module": "system_control",
+    "function": "play_pause_media",
+    "description": "Toggle play/pause for system media."
+  },
 
-  "open_app": ["apps", "open_app"],
-  "close_app": ["apps", "close_app"],
+  "open_app": {
+    "module": "apps",
+    "function": "open_app",
+    "description": "Launch an application by name or path. Target: app name/path."
+  },
+  "close_app": {
+    "module": "apps",
+    "function": "close_app",
+    "description": "Close an application by name/process. Target: app name/process."
+  },
 
-  "schedule_task": ["automation", "schedule_task"],
-  "check_status": ["monitoring", "check_status"],
-  "notify": ["notifications", "send_notification"],
+  "schedule_task": {
+    "module": "automation",
+    "function": "schedule_task",
+    "description": "Schedule a reminder or task. Target: structured text (what/when)."
+  },
+  "check_status": {
+    "module": "monitoring",
+    "function": "check_status",
+    "description": "Report system health: CPU load, RAM usage, disk space, process count."
+  },
+  "notify": {
+    "module": "notifications",
+    "function": "send_notification",
+    "description": "Show a desktop notification (and optionally TTS). Target: message text."
+  },
 
-  "shutdown_computer": ["system_control", "shutdown"],
-  "restart_computer": ["system_control", "restart"]
+  "shutdown_computer": {
+    "module": "system_control",
+    "function": "shutdown",
+    "description": "Alias of shutdown."
+  },
+  "restart_computer": {
+    "module": "system_control",
+    "function": "restart",
+    "description": "Alias of restart."
+  },
+
+  "web_browse": {
+    "module": "web",
+    "function": "web_browse",
+    "description": "Navigate and act in a browser session using the browser-use agent."
+  },
+  "search_web": {
+    "module": "web",
+    "function": "search_web",
+    "description": "Search the web and return results. Target: query string."
+  },
+  "open_webpage": {
+    "module": "web",
+    "function": "open_webpage",
+    "description": "Open a specific webpage in the agent browser. Target: URL string."
+  },
+  "click_element": {
+    "module": "web",
+    "function": "click_element",
+    "description": "Click an element by selector (CSS/XPath/text). Target: selector."
+  },
+  "extract_text": {
+    "module": "web",
+    "function": "extract_text",
+    "description": "Extract text from the current page using a selector. Target: selector."
+  },
+  "summarize_page": {
+    "module": "web",
+    "function": "summarize_page",
+    "description": "Summarize the currently open webpage."
+  }
 }
